@@ -62,8 +62,6 @@ export class BullTaskRegisterService {
                 }
             }
 
-            console.log('-->', metadata);
-
             this.bullService.registerTask(task, metadata, instance);
 
             const desc: string = `Registered task ${metadata.name}`
