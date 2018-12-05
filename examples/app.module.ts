@@ -1,6 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { BullModule, BullTaskRegisterService } from '../lib';
+import { BullService, BullModule, BullTaskRegisterService } from '../lib';
 import { AppTasks } from './app.tasks';
 import { AppController } from './app.controller';
 import { AdvancedSettings, QueueOptions, RateLimiter } from 'bull';
@@ -14,6 +14,7 @@ export class AppModule implements OnModuleInit {
   constructor(
       private readonly moduleRef: ModuleRef,
       private readonly taskRegister: BullTaskRegisterService,
+      private readonly bullService: BullService,
   ) {}
   onModuleInit() {
       this.taskRegister.setModuleRef(this.moduleRef);
@@ -54,7 +55,7 @@ export class AppModule implements OnModuleInit {
         // if true, adds the job to the right of the queue instead of the left (default false)
         lifo: false,
         // The number of milliseconds after which the job should be fail with a timeout error [optional]
-        timeout: 1000,
+        timeout: 30000,
         // If true, removes the job when it successfully
         // completes. Default behavior is to keep the job in the completed set.
         removeOnComplete: true,
@@ -78,6 +79,19 @@ export class AppModule implements OnModuleInit {
         queue: 'myName',
         concurrency: 10,
         options: queueOptions,
+      });
+
+      const queue = this.bullService.getQueue('myName');
+
+      queue.on('global:failed', async (jobId) => {
+        console.log('-->');
+        const job = await queue.getJob(jobId);
+        await job.remove();
+      });
+
+      queue.on('global:stalled', async (jobId) => {
+        const job = await queue.getJob(jobId);
+        await job.remove();
       });
   }
 }

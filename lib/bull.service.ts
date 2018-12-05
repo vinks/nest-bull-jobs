@@ -26,7 +26,7 @@ export class BullService {
         this.queues[BullService.DEFAULT_QUEUE_NAME] = this.createQueue(BullService.DEFAULT_QUEUE_NAME);
     }
 
-    registerTask(task: (job, done) => void, metadata: TaskMetadata, ctrl: Controller) {
+    public registerTask(task: (job, done) => void, metadata: TaskMetadata, ctrl: Controller) {
         const queueName: string = metadata.queue || BullService.DEFAULT_QUEUE_NAME;
         const concurrency: number = metadata.concurrency || BullService.DEFAULT_CONCURRENCY;
 
@@ -39,6 +39,34 @@ export class BullService {
         });
 
         this.tasks[metadata.name] = metadata;
+    }
+
+    public getQueues() {
+        return this.queues;
+    }
+
+    public getQueue(name: string): Bull.Queue {
+        const queueName: string = name || BullService.DEFAULT_QUEUE_NAME;
+        const queue: Bull.Queue = this.getQueues()[queueName];
+
+        return queue;
+    }
+
+    public createJob(task, data: Object, opts?: Bull.JobOptions): Bluebird<Bull.Job<any>> {
+        const metadata: TaskMetadata = this.tasks[task.name];
+        const queue: Bull.Queue = this.getQueue(metadata.queue);
+
+        return queue.add(metadata.name, data, opts);
+    }
+
+    public getJob(jobId: Bull.JobId, queueName?: string): Promise<Bull.Job> {
+      return new Promise((resolve, reject) => {
+            const queue: Bull.Queue = this.getQueue(queueName);
+
+            queue.getJob(jobId).then( (job?: Bull.Job) => {
+                return resolve(job);
+            });
+        });
     }
 
     private createQueue(queueName: string, queueOptions?: Bull.QueueOptions): Bull.Queue {
@@ -60,6 +88,7 @@ export class BullService {
                 }
             });
         }
+
         queue.on('error', (err: Error) => {
            if (err) {
                this.debugLog(undefined, 'job error', err);
@@ -71,29 +100,5 @@ export class BullService {
         let log: string = `Task ${job} ${event} `;
         log += `${(err) ? '\n' + FancyLoggerService.clc.red(err) : ''}`;
         this.fancyLogger.info('BullModule', log, 'TaskRunner');
-    }
-
-    private getQueue(name: string): Bull.Queue {
-        const queueName: string = name || BullService.DEFAULT_QUEUE_NAME;
-        const queue: Bull.Queue = this.queues[queueName];
-
-        return queue;
-    }
-
-    createJob(task, data: Object, opts?: Bull.JobOptions): Bluebird<Bull.Job<any>> {
-        const metadata: TaskMetadata = this.tasks[task.name];
-        const queue: Bull.Queue = this.getQueue(metadata.queue);
-
-        return queue.add(metadata.name, data, opts);
-    }
-
-    getJob(jobId: Bull.JobId, queueName?: string): Promise<Bull.Job> {
-      return new Promise((resolve, reject) => {
-            const queue: Bull.Queue = this.getQueue(queueName);
-
-            queue.getJob(jobId).then( (job?: Bull.Job) => {
-                return resolve(job);
-            });
-        });
     }
 }

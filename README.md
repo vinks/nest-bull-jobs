@@ -16,6 +16,22 @@ $ npm i --save-dev @types/bull
 ## Quick Start
 
 ```ts
+import { Injectable } from '@nestjs/common';
+import Bull = require('bull');
+import { Task } from '../lib';
+
+@Injectable()
+export class AppTasks {
+    @Task({ name: 'justATest' })
+    justATest(job: Bull.Job, done: Bull.DoneCallback) {
+        const result: number = (job.data || []).reduce((a, b) => a + b);
+
+        setTimeout(() => {
+            done(null, result);
+        }, 900);
+    }
+}
+
 import { Controller, Get } from '@nestjs/common';
 import * as Bull from 'bull';
 import { BullService } from '../lib';
