@@ -58,7 +58,7 @@ export class AppModule implements OnModuleInit {
         timeout: 30000,
         // If true, removes the job when it successfully
         // completes. Default behavior is to keep the job in the completed set.
-        removeOnComplete: true,
+        removeOnComplete: false,
         // If true, removes the job when it fails after all attempts.
         // Default behavior is to keep the job in the failed set.
         removeOnFail: false,

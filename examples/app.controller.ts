@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import * as uuid from 'uuid';
 import * as Bull from 'bull';
 import { BullService } from '../lib';
 import { AppTasks } from './app.tasks';
@@ -12,7 +13,7 @@ export class AppController {
 
     @Get()
     public async runTask() {
-        const opt: Bull.JobOptions = { lifo: true };
+        const opt: Bull.JobOptions = { jobId: uuid() };
         const a = 1;
         const b = 2;
 
