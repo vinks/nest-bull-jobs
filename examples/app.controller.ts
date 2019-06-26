@@ -14,8 +14,8 @@ export class AppController {
     @Get()
     public async runTask() {
         const opt: Bull.JobOptions = { jobId: uuid() };
-        const a = 1;
-        const b = 2;
+        const a = Math.floor(Math.random() * 10) + 1;
+        const b = Math.floor(Math.random() * 10) + 1;
 
         const result = await this.bullService.createJob(this.tasks.justATest, {a, b}, opt).then((job) => {
             return job.finished();
