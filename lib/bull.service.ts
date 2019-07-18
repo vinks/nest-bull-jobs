@@ -23,7 +23,7 @@ export class BullService {
     constructor(
         private readonly fancyLogger: FancyLoggerService,
     ) {
-        this.queues[BullService.DEFAULT_QUEUE_NAME] = this.createQueue(BullService.DEFAULT_QUEUE_NAME);
+        // this.queues[BullService.DEFAULT_QUEUE_NAME] = this.createQueue(BullService.DEFAULT_QUEUE_NAME);
     }
 
     public registerTask(task: (job, done) => void, metadata: TaskMetadata, ctrl: Controller) {
@@ -70,6 +70,12 @@ export class BullService {
     }
 
     private createQueue(queueName: string, queueOptions?: Bull.QueueOptions): Bull.Queue {
+        if (!queueName) {
+            throw new Error('No queueName provided');
+        }
+
+        this.fancyLogger.info('Create bull queue', JSON.stringify(queueOptions), queueName);
+
         const queue: Bull.Queue = new Bull(queueName, queueOptions);
 
         if (!this.debugActive && process.env.NESTJS_BULL_DEBUG && queueName === BullService.DEFAULT_QUEUE_NAME) {

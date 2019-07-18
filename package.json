@@ -1,6 +1,6 @@
 {
   "name": "nest-bull-jobs",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Bull tasks wrapper for NestJS framework",
   "author": "Konstantin Vinogradov",
   "license": "MIT",
@@ -20,15 +20,18 @@
     "url": "https://github.com/vinks/nest-bull-jobs/issues"
   },
   "homepage": "https://github.com/vinks/nest-bull-jobs",
+  "peerDependencies": {
+    "@nestjs/common": "^5.1.0 || ^6.0.3"
+  },
   "dependencies": {
-    "@nestjs/common": "^6.3.2",
-    "@nestjs/core": "^6.3.2",
     "bluebird": "^3.5.5",
     "bull": "^3.10.0"
   },
   "devDependencies": {
-    "@nestjs/platform-express": "^6.3.2",
-    "@types/bull": "^3.5.14",
+    "@nestjs/common": "^6.5.3",
+    "@nestjs/core": "^6.5.3",
+    "@nestjs/platform-express": "6.5.3",
+    "@types/bull": "^3.10.0",
     "@types/node": "^7.0.41",
     "cross-env": "^5.2.0",
     "nodemon": "^1.19.1",
@@ -39,7 +42,7 @@
     "ts-node": "^7.0.1",
     "tsconfig-paths": "^3.8.0",
     "tslint": "^5.18.0",
-    "typescript": "^2.7.2",
+    "typescript": "^3.5.3",
     "uuid": "^3.3.2"
   }
 }
