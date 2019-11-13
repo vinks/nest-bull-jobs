@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { MetadataScanner } from '@nestjs/core/metadata-scanner';
 import { TaskMetadataExplorer } from './bull-task-metadata.explorer';
-import { FancyLoggerService } from './fancy-logger.service';
 import { BullService } from './bull.service';
 import { TaskRegisterMetadata } from './bull.utils';
 
@@ -17,13 +16,14 @@ export class BullTaskRegisterService {
     private moduleRef: ModuleRef = null;
     private readonly moduleName: string = 'BullModule';
     private readonly metadataExplorer: TaskMetadataExplorer;
-    private readonly fancyLogger: FancyLoggerService;
+    private logger: Logger = new Logger('Bull tasks');
 
-    constructor(private readonly bullService: BullService) {
+    constructor(
+        private readonly bullService: BullService,
+    ) {
         this.metadataExplorer = new TaskMetadataExplorer(
             new MetadataScanner(),
         );
-        this.fancyLogger = new FancyLoggerService();
     }
 
     setModuleRef(moduleRef) {
@@ -64,10 +64,13 @@ export class BullTaskRegisterService {
 
             this.bullService.registerTask(task, metadata, instance);
 
-            const desc: string = `Registered task ${metadata.name}`
-                + `${(metadata.queue) ? ' on queue ' + metadata.queue : ''}`
-                + `${(metadata.concurrency) ? ' with a concurrency of ' + metadata.concurrency : ''}`;
-            this.fancyLogger.info(this.moduleName, desc, 'TaskExplorer');
+            const taskDesc = {
+                name: metadata.name,
+                queue: metadata.queue,
+                concurrency: metadata.concurrency,
+            };
+
+            this.logger.log(JSON.stringify(taskDesc), 'BullModule register task');
         }
     }
 }

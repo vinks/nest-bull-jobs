@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { TaskMetadata } from './bull.utils';
-import { FancyLoggerService } from './fancy-logger.service';
 import { Controller } from '@nestjs/common/interfaces';
 import * as Bull from 'bull';
 import * as Bluebird from 'bluebird';
@@ -19,12 +18,7 @@ export class BullService {
     private queues: { [name: string]: Bull.Queue } = {};
     private tasks: { [name: string]: TaskMetadata } = {};
     private debugActive: boolean = false;
-
-    constructor(
-        private readonly fancyLogger: FancyLoggerService,
-    ) {
-        // this.queues[BullService.DEFAULT_QUEUE_NAME] = this.createQueue(BullService.DEFAULT_QUEUE_NAME);
-    }
+    private logger: Logger = new Logger('Bull tasks');
 
     public registerTask(task: (job, done) => void, metadata: TaskMetadata, ctrl: Controller) {
         const queueName: string = metadata.queue || BullService.DEFAULT_QUEUE_NAME;
@@ -74,7 +68,7 @@ export class BullService {
             throw new Error('No queueName provided');
         }
 
-        this.fancyLogger.info('Create bull queue', JSON.stringify(queueOptions), queueName);
+        this.logger.log(JSON.stringify({ queue: queueName, ...queueOptions }), 'BullModule create queue');
 
         const queue: Bull.Queue = new Bull(queueName, queueOptions);
 
@@ -103,8 +97,7 @@ export class BullService {
     }
 
     private debugLog(job: Bull.Job, event: string, err?) {
-        let log: string = `Task ${job} ${event} `;
-        log += `${(err) ? '\n' + FancyLoggerService.clc.red(err) : ''}`;
-        this.fancyLogger.info('BullModule', log, 'TaskRunner');
+        const log = { job, event, err };
+        this.logger.error(log, 'BullModule');
     }
 }
